@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FCB Admin CRUD Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="dashboard/css/dashboard.css">
+    <style>
+        /* CRUD-specific styles */
+        .crud-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .crud-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-secondary);
+        }
+
+        .crud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .crud-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .crud-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-container {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-secondary);
+            border-radius: 8px;
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: var(--transition-smooth);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-secondary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #2980b9);
+            color: white;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #c0392b);
+            color: white;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #229954);
+            color: white;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(39, 174, 96, 0.4);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .data-table th {
+            background: var(--bg-glass);
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table td {
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:hover {
+            background: var(--bg-glass);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-active {
+            background: rgba(39, 174, 96, 0.2);
+            color: var(--success);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+
+        .status-inactive {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-primary);
+            animation: slideInRight 0.3s ease-out;
+            max-width: 400px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .notification-success { border-color: var(--success); color: var(--success); }
+        .notification-error { border-color: var(--danger); color: var(--danger); }
+        .notification-warning { border-color: var(--warning); color: var(--warning); }
+        .notification-info { border-color: var(--accent); color: var(--accent); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-secondary);
+            border-radius: 8px;
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="crud-container">
+        <!-- Header -->
+        <div class="crud-header">
+            <h1 class="crud-title">
+                <i class="fas fa-cogs"></i>
+                FCB Admin CRUD Interface
+            </h1>
+            <div class="crud-actions">
+                <a href="dashboard/modern.html" class="btn btn-secondary">
+                    <i class="fas fa-chart-line"></i>
+                    Back to Dashboard
+                </a>
+                <button class="btn btn-primary" onclick="refreshAllData()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh All
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('partners')">
+                <i class="fas fa-handshake"></i>
+                Partners
+            </button>
+            <button class="tab" onclick="switchTab('products')">
+                <i class="fas fa-box"></i>
+                Products
+            </button>
+            <button class="tab" onclick="switchTab('ip-filters')">
+                <i class="fas fa-shield-alt"></i>
+                IP Filters
+            </button>
+        </div>
+
+        <!-- Partners Tab -->
+        <div id="partners-tab" class="tab-content active">
+            <div class="crud-section">
+                <div class="crud-header">
+                    <h2 class="crud-title">
+                        <i class="fas fa-handshake"></i>
+                        Manage Partners
+                    </h2>
+                    <button class="btn btn-primary" onclick="showAddPartnerForm()">
+                        <i class="fas fa-plus"></i>
+                        Add Partner
+                    </button>
+                </div>
+
+                <!-- Add/Edit Partner Form -->
+                <div id="partner-form-container" class="form-container">
+                    <h3 id="partner-form-title">Add New Partner</h3>
+                    <form id="partner-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Partner Code *</label>
+                                <input type="text" id="partner-code" name="partner_code" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Partner Name *</label>
+                                <input type="text" id="partner-name" name="partner_name" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Integration Type *</label>
+                                <select id="integration-type" name="integration_type" class="form-select" required>
+                                    <option value="">Select Type</option>
+                                    <option value="api">API Integration</option>
+                                    <option value="webhook">Webhook Integration</option>
+                                    <option value="direct">Direct Integration</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fee Percentage</label>
+                                <input type="number" id="fee-percentage" name="fee_percentage" class="form-input" step="0.01" min="0" max="1" placeholder="0.01">
+                            </div>
+                        </div>
+                        <div class="form-buttons">
+                            <button type="button" class="btn btn-secondary" onclick="cancelPartnerForm()">
+                                <i class="fas fa-times"></i>
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                <span id="partner-submit-text">Create Partner</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Partners Table -->
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search partners..." onkeyup="searchTable('partners-table', this.value)">
+                </div>
+                <table class="data-table" id="partners-table">
+                    <thead>
+                        <tr>
+                            <th>Partner Code</th>
+                            <th>Partner Name</th>
+                            <th>Integration Type</th>
+                            <th>Fee %</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="partners-tbody">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Products Tab -->
+        <div id="products-tab" class="tab-content">
+            <div class="crud-section">
+                <div class="crud-header">
+                    <h2 class="crud-title">
+                        <i class="fas fa-box"></i>
+                        Manage Products
+                    </h2>
+                    <button class="btn btn-primary" onclick="showAddProductForm()">
+                        <i class="fas fa-plus"></i>
+                        Add Product
+                    </button>
+                </div>
+
+                <!-- Add/Edit Product Form -->
+                <div id="product-form-container" class="form-container">
+                    <h3 id="product-form-title">Add New Product</h3>
+                    <form id="product-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Product Code *</label>
+                                <input type="text" id="product-code" name="product_code" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Product Name *</label>
+                                <input type="text" id="product-name" name="product_name" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Category *</label>
+                                <select id="category-code" name="category_code" class="form-select" required>
+                                    <option value="">Select Category</option>
+                                    <option value="MOTOR">Motor Insurance</option>
+                                    <option value="HEALTH">Health Insurance</option>
+                                    <option value="TRAVEL">Travel Insurance</option>
+                                    <option value="PERSONAL_ACCIDENT">Personal Accident</option>
+                                    <option value="HCP">HCP Insurance</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Partner Code *</label>
+                                <select id="product-partner-code" name="partner_code" class="form-select" required>
+                                    <option value="">Select Partner</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Identifier Type</label>
+                                <select id="identifier-type" name="identifier_type" class="form-select">
+                                    <option value="">Select Type</option>
+                                    <option value="id_number">ID Number</option>
+                                    <option value="passport">Passport</option>
+                                    <option value="license">License Number</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Base Premium</label>
+                                <input type="number" id="base-premium" name="base_premium" class="form-input" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Allow Partial Payment</label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+                                <input type="checkbox" id="allow-partial-payment" name="allow_partial_payment">
+                                <span>Allow customers to make partial payments</span>
+                            </label>
+                        </div>
+                        <div class="form-buttons">
+                            <button type="button" class="btn btn-secondary" onclick="cancelProductForm()">
+                                <i class="fas fa-times"></i>
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                <span id="product-submit-text">Create Product</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Products Table -->
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search products..." onkeyup="searchTable('products-table', this.value)">
+                </div>
+                <table class="data-table" id="products-table">
+                    <thead>
+                        <tr>
+                            <th>Product Code</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Partner</th>
+                            <th>Base Premium</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-tbody">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- IP Filters Tab -->
+        <div id="ip-filters-tab" class="tab-content">
+            <div class="crud-section">
+                <div class="crud-header">
+                    <h2 class="crud-title">
+                        <i class="fas fa-shield-alt"></i>
+                        Manage IP Filters
+                    </h2>
+                    <button class="btn btn-primary" onclick="showAddIpFilterForm()">
+                        <i class="fas fa-plus"></i>
+                        Add IP Filter
+                    </button>
+                </div>
+
+                <!-- Add/Edit IP Filter Form -->
+                <div id="ip-filter-form-container" class="form-container">
+                    <h3 id="ip-filter-form-title">Add New IP Filter</h3>
+                    <form id="ip-filter-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">IP Address *</label>
+                                <input type="text" id="ip-address" name="ip_address" class="form-input" required placeholder="192.168.1.1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Filter Type *</label>
+                                <select id="filter-type" name="filter_type" class="form-select" required>
+                                    <option value="">Select Type</option>
+                                    <option value="whitelist">Whitelist</option>
+                                    <option value="blacklist">Blacklist</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea id="ip-description" name="description" class="form-textarea" placeholder="Optional description for this IP filter"></textarea>
+                        </div>
+                        <div class="form-buttons">
+                            <button type="button" class="btn btn-secondary" onclick="cancelIpFilterForm()">
+                                <i class="fas fa-times"></i>
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                <span id="ip-filter-submit-text">Create IP Filter</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- IP Filters Table -->
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search IP filters..." onkeyup="searchTable('ip-filters-table', this.value)">
+                </div>
+                <table class="data-table" id="ip-filters-table">
+                    <thead>
+                        <tr>
+                            <th>IP Address</th>
+                            <th>Filter Type</th>
+                            <th>Description</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ip-filters-tbody">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard/js/admin-crud.js"></script>
+</body>
+</html>

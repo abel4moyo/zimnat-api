@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@100;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <style>
+        :root {
+            /* Premium Brand Colors */
+            --primary: #1a2332;
+            --secondary: #2c3e50;
+            --accent: #3498db;
+            --gold: #f39c12;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #0f1419;
+            
+            /* Premium Color Palette */
+            --bg-primary: linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #2c3e50 100%);
+            --bg-secondary: rgba(26, 35, 50, 0.95);
+            --bg-tertiary: rgba(44, 62, 80, 0.8);
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --bg-card: linear-gradient(145deg, rgba(26, 35, 50, 0.9), rgba(44, 62, 80, 0.7));
+            
+            /* Text Colors */
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --text-accent: #3498db;
+            
+            /* Interactive Elements */
+            --border-primary: rgba(52, 152, 219, 0.3);
+            --border-secondary: rgba(255, 255, 255, 0.1);
+            --shadow-primary: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --shadow-secondary: 0 10px 20px rgba(0, 0, 0, 0.2);
+            --shadow-glow: 0 0 30px rgba(52, 152, 219, 0.3);
+            
+            /* Animation Variables */
+            --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(52, 152, 219, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(243, 156, 18, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(39, 174, 96, 0.1) 0%, transparent 50%);
+            animation: backgroundFlow 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes backgroundFlow {
+            0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+            50% { opacity: 0.8; transform: scale(1.1) rotate(1deg); }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, var(--accent), var(--gold));
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, var(--gold), var(--accent));
+        }
+
+        /* Premium Header */
+        .header {
+            background: linear-gradient(135deg, rgba(26, 35, 50, 0.95), rgba(44, 62, 80, 0.9));
+            border-bottom: 1px solid var(--border-primary);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-secondary);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            height: 60px;
+            width: 60px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            transition: var(--transition-smooth);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .header-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--text-accent);
+            padding: 0.5rem 1rem;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Premium Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #2980b9);
+            color: white;
+            box-shadow: 0 8px 16px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Section Titles */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .section-title i {
+            font-size: 1.25rem;
+            color: var(--accent);
+            padding: 0.5rem;
+            background: var(--bg-glass);
+            border-radius: 8px;
+            border: 1px solid var(--border-primary);
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Premium Metric Cards */
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-secondary);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--gold));
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-primary);
+            border-color: var(--border-primary);
+        }
+
+        .metric-card:hover::before {
+            opacity: 1;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-primary);
+            color: var(--accent);
+            font-size: 1.25rem;
+        }
+
+        .metric-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-excellent {
+            background: rgba(39, 174, 96, 0.2);
+            color: var(--success);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+
+        .status-warning {
+            background: rgba(243, 156, 18, 0.2);
+            color: var(--warning);
+            border: 1px solid rgba(243, 156, 18, 0.3);
+        }
+
+        .status-critical {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .metric-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .metric-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .metric-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .metric-chart {
+            margin-top: 1rem;
+            height: 40px;
+            background: var(--bg-glass);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            border: 1px solid var(--border-secondary);
+        }
+
+        /* System Resources */
+        .system-resources {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .resource-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-secondary);
+            transition: var(--transition-smooth);
+        }
+
+        .resource-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-primary);
+            border-color: var(--border-primary);
+        }
+
+        .resource-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .resource-title {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .resource-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-glass);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+            border: 1px solid var(--border-secondary);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--accent));
+            transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: progressShine 2s ease-in-out infinite;
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-secondary);
+            height: 300px;
+        }
+
+        /* Analytics Grid */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .analytics-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-secondary);
+        }
+
+        /* Recent Transactions */
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-secondary);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: var(--transition-smooth);
+        }
+
+        .transaction-item:hover {
+            transform: translateX(4px);
+            border-color: var(--border-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .transaction-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .transaction-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .transaction-amount {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--success);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-secondary);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1.5rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .system-resources {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-primary);
+            animation: slideInRight 0.3s ease-out;
+            max-width: 400px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .notification-success { border-color: var(--success); color: var(--success); }
+        .notification-error { border-color: var(--danger); color: var(--danger); }
+        .notification-warning { border-color: var(--warning); color: var(--warning); }
+        .notification-info { border-color: var(--accent); color: var(--accent); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Premium Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-brand">
+                    <div class="logo">EC</div>
+                    <div class="header-title">
+                        <h1>Enterprise Command Center</h1>
+                        <p class="header-subtitle">Multi-Partner Integration Platform</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="header-time" id="realTimeClock">
+                        <i class="fas fa-clock"></i>
+                        <span id="clockTime">Loading...</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="location.reload()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="btn btn-secondary" onclick="showApiDocs()">
+                        <i class="fas fa-book"></i>
+                        API Docs
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Core Performance Metrics -->
+            <div class="metrics-section">
+                <h2 class="section-title">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Real-Time Performance Analytics
+                </h2>
+                <div class="metrics-grid">
+                    <!-- API Uptime Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, rgba(39, 174, 96, 0.2), rgba(39, 174, 96, 0.1)); color: var(--success);">
+                                <i class="fas fa-heartbeat"></i>
+                            </div>
+                            <div class="metric-status status-excellent">Excellent</div>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-title">System Uptime</div>
+                            <div class="metric-value" id="uptime-value">99.95%</div>
+                            <div class="metric-subtitle">Target: 99.9% • Current: <span id="uptime-duration">24h 15m</span></div>
+                            <div class="metric-chart">
+                                <canvas id="uptimeSparkline" width="200" height="40"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Response Time Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(52, 152, 219, 0.1)); color: var(--accent);">
+                                <i class="fas fa-stopwatch"></i>
+                            </div>
+                            <div class="metric-status status-excellent" id="response-status">Optimal</div>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-title">Average Response Time</div>
+                            <div class="metric-value" id="response-time">89ms</div>
+                            <div class="metric-subtitle">Peak: <span id="peak-time">156ms</span> • Min: <span id="min-time">23ms</span></div>
+                            <div class="metric-chart">
+                                <canvas id="responseTimeSparkline" width="200" height="40"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Throughput Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, rgba(243, 156, 18, 0.2), rgba(243, 156, 18, 0.1)); color: var(--gold);">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="metric-status status-excellent">Active</div>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-title">Request Throughput</div>
+                            <div class="metric-value" id="throughput-value">45.2</div>
+                            <div class="metric-subtitle">req/sec • Total: <span id="total-requests">1,234,567</span></div>
+                            <div class="metric-chart">
+                                <canvas id="throughputSparkline" width="200" height="40"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Rate Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(231, 76, 60, 0.1)); color: var(--danger);">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="metric-status status-excellent" id="error-status">Healthy</div>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-title">Error Rate</div>
+                            <div class="metric-value" id="error-rate">0.02%</div>
+                            <div class="metric-subtitle">Errors: <span id="error-count">42</span> • Rate: <span id="errors-per-min">0/min</span></div>
+                            <div class="metric-chart">
+                                <canvas id="errorRateSparkline" width="200" height="40"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Database Performance -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(155, 89, 182, 0.1)); color: #9b59b6;">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="metric-status status-excellent" id="db-status">Connected</div>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-title">Database Health</div>
+                            <div class="metric-value" id="db-health">100%</div>
+                            <div class="metric-subtitle">Pool Status: <span id="db-pool-status">Active</span></div>
+                            <div class="metric-chart">
+                                <div style="width: 100%; height: 100%; background: linear-gradient(90deg, var(--success), transparent); border-radius: 4px; opacity: 0.6;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business Metrics -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, rgba(64, 145, 108, 0.2), rgba(64, 145, 108, 0.1)); color: #40916c;">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="metric-status status-excellent">Growing</div>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-title">Total Revenue</div>
+                            <div class="metric-value" id="revenue-value">$2.4M</div>
+                            <div class="metric-subtitle">Policies: <span id="policy-count">15,432</span> • Customers: <span id="customer-count">8,921</span></div>
+                            <div class="metric-chart">
+                                <canvas id="revenueSparkline" width="200" height="40"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Resources -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-server"></i>
+                    Infrastructure Health Monitor
+                </h2>
+                <div class="system-resources">
+                    <div class="resource-item">
+                        <div class="resource-header">
+                            <div class="resource-title">
+                                <i class="fas fa-microchip" style="color: var(--gold); margin-right: 8px;"></i>
+                                CPU Performance
+                            </div>
+                            <div class="resource-value" style="color: var(--success);" id="cpu-value">
+                                23.4%
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 23.4%; background: linear-gradient(90deg, var(--success), var(--accent));"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span>Load: <span id="cpu-load">0.84</span></span>
+                            <span>Cores: <span id="cpu-cores">8</span></span>
+                        </div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-header">
+                            <div class="resource-title">
+                                <i class="fas fa-memory" style="color: var(--accent); margin-right: 8px;"></i>
+                                Memory Utilization
+                            </div>
+                            <div class="resource-value" style="color: var(--success);" id="memory-value">
+                                67.8%
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 67.8%; background: linear-gradient(90deg, var(--success), var(--accent));"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span>Used: <span id="memory-used">5.4GB</span></span>
+                            <span>Total: <span id="memory-total">8.0GB</span></span>
+                        </div>
+                    </div>
+
+                    <div class="resource-item">
+                        <div class="resource-header">
+                            <div class="resource-title">
+                                <i class="fab fa-node-js" style="color: var(--success); margin-right: 8px;"></i>
+                                Runtime Environment
+                            </div>
+                            <div class="resource-value" style="color: var(--success);" id="node-version">
+                                v18.17.0
+                            </div>
+                        </div>
+                        <div class="progress-info" style="margin-top: 12px;">
+                            <span id="platform">Linux</span>
+                            <span id="architecture">x64</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Chart -->
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Business Analytics -->
+            <div class="analytics-grid">
+                <!-- Recent Transactions -->
+                <div class="analytics-card">
+                    <h3 class="section-title" style="font-size: 1.25rem; margin-bottom: 1rem;">
+                        <i class="fas fa-receipt"></i>
+                        Recent Transactions
+                    </h3>
+                    <div style="max-height: 400px; overflow-y: auto;" id="transactions-container">
+                        <div class="transaction-item">
+                            <div class="transaction-details">
+                                <div class="transaction-id">ID: TXN-2024-001234</div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">John Doe - Motor Insurance</div>
+                            </div>
+                            <div class="transaction-amount">$1,250.00</div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-details">
+                                <div class="transaction-id">ID: TXN-2024-001233</div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">Jane Smith - Health Insurance</div>
+                            </div>
+                            <div class="transaction-amount">$850.00</div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-details">
+                                <div class="transaction-id">ID: TXN-2024-001232</div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">Bob Johnson - Property Insurance</div>
+                            </div>
+                            <div class="transaction-amount">$2,100.00</div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-details">
+                                <div class="transaction-id">ID: TXN-2024-001231</div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">Alice Brown - Travel Insurance</div>
+                            </div>
+                            <div class="transaction-amount">$320.00</div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-details">
+                                <div class="transaction-id">ID: TXN-2024-001230</div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">Charlie Wilson - Motor Insurance</div>
+                            </div>
+                            <div class="transaction-amount">$1,450.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Partner Performance -->
+                <div class="analytics-card">
+                    <h3 class="section-title" style="font-size: 1.25rem; margin-bottom: 1rem;">
+                        <i class="fas fa-handshake"></i>
+                        Partner Analytics
+                    </h3>
+                    <div style="max-height: 400px; overflow-y: auto;" id="partners-container">
+                        <div class="transaction-item">
+                            <div class="transaction-details">
+                                <div style="font-weight: 600; color: var(--text-primary);">First Capital Bank</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Banking Partner</div>
+                            </div>
+                            <div class="transaction-amount">$524K</div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-details">
+                                <div style="font-weight: 600; color: var(--text-primary);">Zimnat Insurance</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Insurance Provider</div>
+                            </div>
+                            <div class="transaction-amount">$1.2M</div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-details">
+                                <div style="font-weight: 600; color: var(--text-primary);">TIC Insurance</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Travel Insurance</div>
+                            </div>
+                            <div class="transaction-amount">$342K</div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-details">
+                                <div style="font-weight: 600; color: var(--text-primary);">CABS Bank</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Payment Processor</div>
+                            </div>
+                            <div class="transaction-amount">$178K</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Status Section -->
+            <div class="section">
+                <h2 class="section-title">
+                    <i class="fas fa-route"></i>
+                    API Endpoint Status
+                </h2>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, rgba(39, 174, 96, 0.2), rgba(39, 174, 96, 0.1)); color: var(--success);">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="metric-status status-excellent">Secure</div>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-title">Authentication API</div>
+                            <div class="metric-value">100%</div>
+                            <div class="metric-subtitle">Requests: 45,821 • Avg: 23ms</div>
+                            <div class="metric-chart">Endpoint health trending up</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(52, 152, 219, 0.1)); color: var(--accent);">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                            <div class="metric-status status-excellent">Active</div>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-title">Policy Lookup</div>
+                            <div class="metric-value">99.8%</div>
+                            <div class="metric-subtitle">Requests: 23,456 • Avg: 89ms</div>
+                            <div class="metric-chart">High traffic endpoint</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, rgba(243, 156, 18, 0.2), rgba(243, 156, 18, 0.1)); color: var(--gold);">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="metric-status status-warning">Busy</div>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-title">Payment Processing</div>
+                            <div class="metric-value">98.5%</div>
+                            <div class="metric-subtitle">Requests: 12,789 • Avg: 156ms</div>
+                            <div class="metric-chart">Payment gateway load</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(155, 89, 182, 0.1)); color: #9b59b6;">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <div class="metric-status status-excellent">Optimal</div>
+                        </div>
+                        <div class="metric-body">
+                            <div class="metric-title">Motor Quotes</div>
+                            <div class="metric-value">100%</div>
+                            <div class="metric-subtitle">Requests: 8,943 • Avg: 67ms</div>
+                            <div class="metric-chart">Quote generation active</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for real-time updates
+        let performanceChart;
+        let sparklineCharts = {};
+
+        // Real-time clock
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false 
+            });
+            const dateString = now.toLocaleDateString([], { 
+                weekday: 'short',
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            const clockElement = document.getElementById('clockTime');
+            if (clockElement) {
+                clockElement.innerHTML = `${timeString} <span style="color: var(--text-muted);">•</span> ${dateString}`;
+            }
+        }
+
+        // Update real-time metrics
+        function updateMetrics() {
+            // Simulate real-time data updates
+            const responseTime = Math.floor(Math.random() * 100) + 50;
+            const throughput = (Math.random() * 20 + 30).toFixed(1);
+            const errorRate = (Math.random() * 0.1).toFixed(3);
+            const cpuUsage = (Math.random() * 30 + 15).toFixed(1);
+            const memoryUsage = (Math.random() * 20 + 60).toFixed(1);
+
+            // Update response time
+            document.getElementById('response-time').textContent = responseTime + 'ms';
+            
+            // Update throughput
+            document.getElementById('throughput-value').textContent = throughput;
+            
+            // Update error rate
+            document.getElementById('error-rate').textContent = errorRate + '%';
+            
+            // Update CPU usage
+            document.getElementById('cpu-value').textContent = cpuUsage + '%';
+            
+            // Update memory usage
+            document.getElementById('memory-value').textContent = memoryUsage + '%';
+
+            // Update status indicators based on values
+            updateStatusIndicators(responseTime, parseFloat(errorRate), parseFloat(cpuUsage));
+        }
+
+        // Update status indicators
+        function updateStatusIndicators(responseTime, errorRate, cpuUsage) {
+            const responseStatus = document.getElementById('response-status');
+            const errorStatus = document.getElementById('error-status');
+            
+            // Response time status
+            if (responseTime > 200) {
+                responseStatus.className = 'metric-status status-critical';
+                responseStatus.textContent = 'Critical';
+            } else if (responseTime > 100) {
+                responseStatus.className = 'metric-status status-warning';
+                responseStatus.textContent = 'Warning';
+            } else {
+                responseStatus.className = 'metric-status status-excellent';
+                responseStatus.textContent = 'Optimal';
+            }
+
+            // Error rate status
+            if (errorRate > 1) {
+                errorStatus.className = 'metric-status status-critical';
+                errorStatus.textContent = 'Critical';
+            } else if (errorRate > 0.5) {
+                errorStatus.className = 'metric-status status-warning';
+                errorStatus.textContent = 'Warning';
+            } else {
+                errorStatus.className = 'metric-status status-excellent';
+                errorStatus.textContent = 'Healthy';
+            }
+        }
+
+        // Show API documentation
+        function showApiDocs() {
+            showNotification('API Documentation would open here', 'info');
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: auto; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.animation = 'slideInRight 0.3s ease-out reverse';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Chart initialization
+        function initializeCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            font: { family: 'Inter', size: 12, weight: '500' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(26, 35, 50, 0.95)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: 'rgba(52, 152, 219, 0.3)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        titleFont: { family: 'Inter', size: 13, weight: '600' },
+                        bodyFont: { family: 'Inter', size: 12 }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { 
+                            color: 'rgba(255, 255, 255, 0.6)',
+                            font: { family: 'Inter', size: 11 }
+                        },
+                        grid: { 
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false
+                        }
+                    },
+                    y: {
+                        ticks: { 
+                            color: 'rgba(255, 255, 255, 0.6)',
+                            font: { family: 'Inter', size: 11 }
+                        },
+                        grid: { 
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false
+                        }
+                    }
+                }
+            };
+
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart');
+            if (performanceCtx) {
+                performanceChart = new Chart(performanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: 24}, (_, i) => `${i.toString().padStart(2, '0')}:00`),
+                        datasets: [{
+                            label: 'Response Time (ms)',
+                            data: Array.from({length: 24}, () => Math.random() * 200 + 50),
+                            borderColor: 'rgb(52, 152, 219)',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(52, 152, 219)',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }, {
+                            label: 'Error Rate (%)',
+                            data: Array.from({length: 24}, () => Math.random() * 3),
+                            borderColor: 'rgb(231, 76, 60)',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1',
+                            pointBackgroundColor: 'rgb(231, 76, 60)',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }, {
+                            label: 'Throughput (req/s)',
+                            data: Array.from({length: 24}, () => Math.random() * 100 + 20),
+                            borderColor: 'rgb(243, 156, 18)',
+                            backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y2',
+                            pointBackgroundColor: 'rgb(243, 156, 18)',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            ...chartOptions.scales,
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                ticks: { 
+                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    font: { family: 'Inter', size: 11 }
+                                },
+                                grid: { drawOnChartArea: false }
+                            },
+                            y2: {
+                                type: 'linear',
+                                display: false,
+                                ticks: { 
+                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    font: { family: 'Inter', size: 11 }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Sparkline charts
+            const sparklineOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: { display: false },
+                    y: { display: false }
+                },
+                elements: {
+                    point: { radius: 0 }
+                }
+            };
+
+            // Initialize sparklines
+            const sparklines = [
+                { id: 'uptimeSparkline', color: 'rgb(39, 174, 96)', data: () => Array.from({length: 20}, () => 99 + Math.random() * 1) },
+                { id: 'responseTimeSparkline', color: 'rgb(52, 152, 219)', data: () => Array.from({length: 20}, () => 89 + (Math.random() - 0.5) * 50) },
+                { id: 'throughputSparkline', color: 'rgb(243, 156, 18)', data: () => Array.from({length: 20}, () => 45 * (0.8 + Math.random() * 0.4)) },
+                { id: 'errorRateSparkline', color: 'rgb(231, 76, 60)', data: () => Array.from({length: 20}, () => Math.random() * 0.1) },
+                { id: 'revenueSparkline', color: 'rgb(64, 145, 108)', data: () => Array.from({length: 20}, (_, i) => 2400000 * (0.7 + i * 0.015 + Math.random() * 0.1)) }
+            ];
+
+            sparklines.forEach(sparkline => {
+                const ctx = document.getElementById(sparkline.id);
+                if (ctx) {
+                    sparklineCharts[sparkline.id] = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: Array.from({length: 20}, (_, i) => i),
+                            datasets: [{
+                                data: sparkline.data(),
+                                borderColor: sparkline.color,
+                                backgroundColor: sparkline.color.replace('rgb', 'rgba').replace(')', ', 0.2)'),
+                                borderWidth: 2,
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: sparklineOptions
+                    });
+                }
+            });
+        }
+
+        // Update sparkline charts
+        function updateSparklineCharts() {
+            Object.keys(sparklineCharts).forEach(chartId => {
+                const chart = sparklineCharts[chartId];
+                if (chart) {
+                    // Shift data left and add new data point
+                    chart.data.datasets[0].data.shift();
+                    
+                    // Add new data based on chart type
+                    let newValue;
+                    switch(chartId) {
+                        case 'uptimeSparkline':
+                            newValue = 99 + Math.random() * 1;
+                            break;
+                        case 'responseTimeSparkline':
+                            newValue = parseInt(document.getElementById('response-time').textContent) + (Math.random() - 0.5) * 20;
+                            break;
+                        case 'throughputSparkline':
+                            newValue = parseFloat(document.getElementById('throughput-value').textContent) * (0.8 + Math.random() * 0.4);
+                            break;
+                        case 'errorRateSparkline':
+                            newValue = parseFloat(document.getElementById('error-rate').textContent.replace('%', ''));
+                            break;
+                        case 'revenueSparkline':
+                            newValue = 2400000 * (0.9 + Math.random() * 0.2);
+                            break;
+                        default:
+                            newValue = Math.random() * 100;
+                    }
+                    
+                    chart.data.datasets[0].data.push(newValue);
+                    chart.update('none');
+                }
+            });
+        }
+
+        // Enhanced hover effects
+        function initializeInteractions() {
+            document.querySelectorAll('.metric-card, .resource-item, .analytics-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-8px) scale(1.02)';
+                    card.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Add loading states to buttons
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (this.dataset.loading !== 'true') {
+                        const originalContent = this.innerHTML;
+                        this.dataset.loading = 'true';
+                        this.innerHTML = '<div class="loading-spinner"></div> Loading...';
+                        this.disabled = true;
+
+                        // Reset after 2 seconds
+                        setTimeout(() => {
+                            this.innerHTML = originalContent;
+                            this.disabled = false;
+                            this.dataset.loading = 'false';
+                        }, 2000);
+                    }
+                });
+            });
+        }
+
+        // Keyboard shortcuts
+        function initializeKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + R for refresh
+                if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                    e.preventDefault();
+                    location.reload();
+                }
+            });
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            initializeCharts();
+            initializeInteractions();
+            initializeKeyboardShortcuts();
+            
+            // Start real-time updates
+            setInterval(updateClock, 1000);
+            setInterval(updateMetrics, 5000);
+            setInterval(updateSparklineCharts, 3000);
+            
+            // Auto-refresh dashboard every 5 minutes
+            setTimeout(() => {
+                showNotification('Dashboard refreshing...', 'info');
+                setTimeout(() => location.reload(), 2000);
+            }, 300000);
+
+            // Performance monitoring
+            if ('performance' in window) {
+                window.addEventListener('load', () => {
+                    const perfData = performance.getEntriesByType('navigation')[0];
+                    console.log('Dashboard Load Performance:', {
+                        'DOM Load': Math.round(perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart) + 'ms',
+                        'Page Load': Math.round(perfData.loadEventEnd - perfData.loadEventStart) + 'ms',
+                        'Total Load Time': Math.round(perfData.loadEventEnd - perfData.fetchStart) + 'ms'
+                    });
+                });
+            }
+
+            // Console welcome message
+            console.log('%cEnterprise Command Center', 'color: #3498db; font-size: 20px; font-weight: bold;');
+            console.log('%cDashboard loaded successfully! 🚀', 'color: #27ae60; font-size: 14px;');
+            console.log('System Status: ✅ All systems operational');
+            
+            // Initial notification
+            setTimeout(() => {
+                showNotification('Dashboard initialized successfully!', 'success');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

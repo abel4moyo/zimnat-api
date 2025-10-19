@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FCB Multi-Partner Integration Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        /* Admin Panel Styles */
+        .admin-panel {
+            background: linear-gradient(145deg, rgba(26, 35, 50, 0.95), rgba(44, 62, 80, 0.9));
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .admin-panel.hidden {
+            display: none;
+        }
+
+        .admin-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .admin-panel-header h3 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .close-btn {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+            border-radius: 8px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(231, 76, 60, 0.3);
+            transform: scale(1.1);
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-tab {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .admin-tab.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+
+        .admin-tab:hover {
+            color: #ffffff;
+        }
+
+        .admin-tab-content {
+            display: none;
+        }
+
+        .admin-tab-content.active {
+            display: block;
+        }
+
+        .admin-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-form {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-form.hidden {
+            display: none;
+        }
+
+        .admin-form h4 {
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 1.5rem 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            color: #ffffff;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group input,
+        .form-group select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: #ffffff;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 8px 16px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(44, 62, 80, 0.8);
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .admin-table-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table th {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+            color: #ffffff;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table td {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-active {
+            background: rgba(39, 174, 96, 0.2);
+            color: #27ae60;
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+
+        .status-inactive {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        /* Action button styling */
+        .action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: rgba(44, 62, 80, 0.8);
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, rgba(26, 35, 50, 0.9), rgba(44, 62, 80, 0.7));
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: slideInRight 0.3s ease-out;
+            max-width: 400px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .notification-success { border-color: #27ae60; color: #27ae60; }
+        .notification-error { border-color: #e74c3c; color: #e74c3c; }
+        .notification-warning { border-color: #f39c12; color: #f39c12; }
+        .notification-info { border-color: #3498db; color: #3498db; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-brand">
+                    <img src="https://zimnat.co.zw/wp-content/uploads/2021/08/logo.png" alt="Zimnat Logo" class="logo">
+                    <div class="header-title">
+                        <h1>
+                            <i class="fas fa-tachometer-alt"></i>
+                            FCB Multi-Partner Integration
+                        </h1>
+                        <p class="header-subtitle">Enterprise Dashboard Portal • Real-time Analytics</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="header-time" id="realTimeClock">
+                        <i class="fas fa-clock"></i>
+                        <span id="clockTime">Loading...</span>
+                    </div>
+                    <button class="action-btn" id="refresh-btn">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <a href="/api/swagger" class="action-btn" target="_blank">
+                        <i class="fas fa-file-code"></i>
+                        API Docs
+                    </a>
+                    <button class="action-btn" id="admin-btn">
+                        <i class="fas fa-cogs"></i>
+                        Admin
+                    </button>
+                    <div class="auto-refresh-toggle">
+                        <input type="checkbox" id="auto-refresh-toggle" checked>
+                        <label for="auto-refresh-toggle">Auto-refresh</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="loading-spinner hidden">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading dashboard data...</p>
+            </div>
+
+            <!-- Overview Cards -->
+            <div class="metrics-section">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-line"></i>
+                    Performance Overview
+                </h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-value" id="total-customers">Loading...</div>
+                        <div class="stat-label">Total Customers</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            Active Users
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon info">
+                            <i class="fas fa-file-contract"></i>
+                        </div>
+                        <div class="stat-value" id="total-policies">Loading...</div>
+                        <div class="stat-label">Active Policies</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-shield-alt"></i>
+                            Protected
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="stat-value" id="total-transactions">Loading...</div>
+                        <div class="stat-label">Total Transactions</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-chart-line"></i>
+                            Processing
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-value" id="total-revenue">Loading...</div>
+                        <div class="stat-label">Total Revenue</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-trending-up"></i>
+                            Growing
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-quote-right"></i>
+                        </div>
+                        <div class="stat-value" id="total-zimnat-quotes">Loading...</div>
+                        <div class="stat-label">Zimnat Quotes</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-star"></i>
+                            Popular
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon info">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div class="stat-value" id="total-partners">Loading...</div>
+                        <div class="stat-label">Active Partners</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-check-circle"></i>
+                            Connected
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Health -->
+            <div class="section">
+                <h3 class="section-title">
+                    <i class="fas fa-heartbeat"></i>
+                    Service Health
+                </h3>
+                <div class="system-metrics">
+                    <div class="system-metric">
+                        <div class="status-indicator" id="status-indicator"></div>
+                        <div class="system-metric-value" id="api-status">Checking...</div>
+                        <div class="system-metric-label">API Status</div>
+                    </div>
+                    <div class="system-metric">
+                        <div class="system-metric-value" id="system-uptime">Loading...</div>
+                        <div class="system-metric-label">System Uptime</div>
+                    </div>
+                    <div class="system-metric">
+                        <div class="system-metric-value">99.9%</div>
+                        <div class="system-metric-label">Availability</div>
+                    </div>
+                    <div class="system-metric">
+                        <div class="system-metric-value" id="last-updated">Loading...</div>
+                        <div class="system-metric-label">Last Updated</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Analytics -->
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Transaction Status
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="transaction-status-chart"></canvas>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Revenue by Partner
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="revenue-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Partners Table -->
+            <div class="section">
+                <h3 class="section-title">
+                    <i class="fas fa-handshake"></i>
+                    Partner Status
+                </h3>
+                <div class="table-container">
+                    <table class="data-table" id="partners-table">
+                        <thead>
+                            <tr>
+                                <th>Partner</th>
+                                <th>Service Type</th>
+                                <th>Customers</th>
+                                <th>Transactions</th>
+                                <th>Revenue</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dynamic content loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="section">
+                <h3 class="section-title">
+                    <i class="fas fa-clock"></i>
+                    Recent Activity
+                </h3>
+                <div class="activity-container">
+                    <div class="activity-header">
+                        <span class="activity-count" id="activity-count">Loading...</span>
+                        <div class="activity-filters">
+                            <button class="btn btn-sm activity-filter active" data-filter="all">All</button>
+                            <button class="btn btn-sm activity-filter" data-filter="completed">Completed</button>
+                            <button class="btn btn-sm activity-filter" data-filter="pending">Pending</button>
+                            <button class="btn btn-sm activity-filter" data-filter="failed">Failed</button>
+                        </div>
+                    </div>
+                    <div class="activity-list" id="activity-list">
+                        <!-- Dynamic content loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Endpoints -->
+            <div class="section">
+                <h3 class="section-title">
+                    <i class="fas fa-cogs"></i>
+                    Available Services
+                </h3>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon zimnat">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4>Zimnat Insurance</h4>
+                        <p>Motor, Life, and General Insurance</p>
+                        <div class="service-status active">Active</div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon chema">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h4>Zimnat Chema</h4>
+                        <p>Cash Plan Insurance</p>
+                        <div class="service-status active">Active</div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon motor">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <h4>Motor Insurance</h4>
+                        <p>Vehicle Coverage</p>
+                        <div class="service-status active">Active</div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon hcp">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h4>Health Care Plus</h4>
+                        <p>Medical Insurance</p>
+                        <div class="service-status active">Active</div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon personal">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h4>Personal Accident</h4>
+                        <p>Individual Protection</p>
+                        <div class="service-status active">Active</div>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon domestic">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <h4>Domestic Insurance</h4>
+                        <p>Home & Property</p>
+                        <div class="service-status active">Active</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Panel (Hidden by default) -->
+            <div id="admin-panel" class="admin-panel hidden">
+                <div class="admin-panel-header">
+                    <h3><i class="fas fa-cogs"></i> Admin Control Panel</h3>
+                    <button class="close-btn" id="admin-close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="admin-tabs">
+                    <button class="admin-tab active" data-tab="partners">
+                        <i class="fas fa-handshake"></i> Partners
+                    </button>
+                    <button class="admin-tab" data-tab="products">
+                        <i class="fas fa-box"></i> Products
+                    </button>
+                    <button class="admin-tab" data-tab="ip-filters">
+                        <i class="fas fa-shield-alt"></i> IP Filters
+                    </button>
+                </div>
+
+                <!-- Partners Admin Tab -->
+                <div id="admin-partners-tab" class="admin-tab-content active">
+                    <div class="admin-actions">
+                        <button class="btn btn-primary" id="add-partner-btn">
+                            <i class="fas fa-plus"></i> Add Partner
+                        </button>
+                    </div>
+                    
+                    <div id="partner-form" class="admin-form hidden">
+                        <h4 id="partner-form-title">Add New Partner</h4>
+                        <form id="partner-form-element">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Partner Code *</label>
+                                    <input type="text" id="partner-code" name="partner_code" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Partner Name *</label>
+                                    <input type="text" id="partner-name" name="partner_name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Integration Type *</label>
+                                    <select id="integration-type" name="integration_type" required>
+                                        <option value="">Select Type</option>
+                                        <option value="api">API Integration</option>
+                                        <option value="webhook">Webhook Integration</option>
+                                        <option value="direct">Direct Integration</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Fee Percentage</label>
+                                    <input type="number" id="fee-percentage" name="fee_percentage" step="0.01" min="0" max="1" placeholder="0.01">
+                                </div>
+                            </div>
+                            <div class="form-buttons">
+                                <button type="button" class="btn btn-secondary" id="cancel-partner-btn">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <span id="partner-submit-text">Create Partner</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="admin-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Partner Code</th>
+                                    <th>Partner Name</th>
+                                    <th>Integration Type</th>
+                                    <th>Fee %</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-partners-tbody">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Products Admin Tab -->
+                <div id="admin-products-tab" class="admin-tab-content">
+                    <div class="admin-actions">
+                        <button class="btn btn-primary" id="add-product-btn">
+                            <i class="fas fa-plus"></i> Add Product
+                        </button>
+                    </div>
+                    
+                    <div id="product-form" class="admin-form hidden">
+                        <h4 id="product-form-title">Add New Product</h4>
+                        <form id="product-form-element">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Product Code *</label>
+                                    <input type="text" id="product-code" name="product_code" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Product Name *</label>
+                                    <input type="text" id="product-name" name="product_name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Category *</label>
+                                    <select id="category-code" name="category_code" required>
+                                        <option value="">Select Category</option>
+                                        <option value="MOTOR">Motor Insurance</option>
+                                        <option value="HEALTH">Health Insurance</option>
+                                        <option value="TRAVEL">Travel Insurance</option>
+                                        <option value="PERSONAL_ACCIDENT">Personal Accident</option>
+                                        <option value="HCP">HCP Insurance</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Partner Code *</label>
+                                    <select id="product-partner-code" name="partner_code" required>
+                                        <option value="">Select Partner</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-buttons">
+                                <button type="button" class="btn btn-secondary" id="cancel-product-btn">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <span id="product-submit-text">Create Product</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="admin-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Code</th>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Partner</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-products-tbody">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- IP Filters Admin Tab -->
+                <div id="admin-ip-filters-tab" class="admin-tab-content">
+                    <div class="admin-actions">
+                        <button class="btn btn-primary" id="add-ip-filter-btn">
+                            <i class="fas fa-plus"></i> Add IP Filter
+                        </button>
+                    </div>
+                    
+                    <div id="ip-filter-form" class="admin-form hidden">
+                        <h4 id="ip-filter-form-title">Add New IP Filter</h4>
+                        <form id="ip-filter-form-element">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>IP Address *</label>
+                                    <input type="text" id="ip-address" name="ip_address" required placeholder="192.168.1.1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Filter Type *</label>
+                                    <select id="filter-type" name="filter_type" required>
+                                        <option value="">Select Type</option>
+                                        <option value="whitelist">Whitelist</option>
+                                        <option value="blacklist">Blacklist</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-buttons">
+                                <button type="button" class="btn btn-secondary" id="cancel-ip-filter-btn">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <span id="ip-filter-submit-text">Create IP Filter</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="admin-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>IP Address</th>
+                                    <th>Filter Type</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-ip-filters-tbody">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/dashboard.js"></script>
+    <script>
+        // Additional dashboard functionality
+        function filterActivity(status) {
+            const buttons = document.querySelectorAll('.activity-filter');
+            const activities = document.querySelectorAll('.activity-item');
+            
+            // Update active button
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-filter="${status}"]`).classList.add('active');
+            
+            // Filter activities
+            activities.forEach(activity => {
+                if (status === 'all' || activity.dataset.status === status) {
+                    activity.style.display = 'flex';
+                } else {
+                    activity.style.display = 'none';
+                }
+            });
+        }
+
+        // Add event listeners for activity filters
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.activity-filter').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterActivity(btn.dataset.filter);
+                });
+            });
+        });
+
+        // Real-time clock update
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            const dateString = now.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            const clockElement = document.getElementById('clockTime');
+            if (clockElement) {
+                clockElement.textContent = `${timeString} • ${dateString}`;
+            }
+        }
+
+        // Initialize clock
+        updateClock();
+        setInterval(updateClock, 1000);
+        
+        // Setup all event listeners on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, setting up admin event listeners...');
+            setupAllEventListeners();
+            initializeMutationObserver();
+        });
+        
+        // MutationObserver to handle dynamic content changes
+        function initializeMutationObserver() {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    // Check for class changes that might affect admin panel visibility
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const target = mutation.target;
+                        
+                        // If admin panel became visible
+                        if (target.id === 'admin-panel' && !target.classList.contains('hidden')) {
+                            console.log('🔍 Admin panel became visible, re-setting up listeners...');
+                            setTimeout(() => {
+                                setupFormButtonListeners();
+                                setupFormSubmissionListeners();
+                            }, 50);
+                        }
+                        
+                        // If admin tab content became visible
+                        if (target.classList.contains('admin-tab-content') && target.classList.contains('active')) {
+                            console.log('🔍 Admin tab content became active, re-setting up listeners...');
+                            setTimeout(() => {
+                                setupFormButtonListeners();
+                                setupFormSubmissionListeners();
+                            }, 50);
+                        }
+                    }
+                    
+                    // Check for added nodes that might need event listeners
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                // If new buttons were added, set up listeners
+                                if (node.classList && (
+                                    node.classList.contains('edit-partner-btn') ||
+                                    node.classList.contains('delete-partner-btn') ||
+                                    node.classList.contains('edit-product-btn') ||
+                                    node.classList.contains('delete-product-btn') ||
+                                    node.classList.contains('edit-ip-filter-btn') ||
+                                    node.classList.contains('delete-ip-filter-btn')
+                                )) {
+                                    console.log('🔍 New table buttons added, listeners already handled by delegation');
+                                }
+                                
+                                // If new forms were added
+                                if (node.id === 'partner-form-element' || 
+                                    node.id === 'product-form-element' || 
+                                    node.id === 'ip-filter-form-element') {
+                                    console.log('🔍 New form added, re-setting up listeners...');
+                                    setTimeout(() => setupFormSubmissionListeners(), 50);
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // Start observing the admin panel and its children
+            const adminPanel = document.getElementById('admin-panel');
+            if (adminPanel) {
+                observer.observe(adminPanel, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+                console.log('✅ MutationObserver initialized for admin panel');
+            }
+            
+            // Also observe the main document for dynamic content
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['class']
+            });
+            
+            console.log('✅ MutationObserver initialized for document body');
+        }
+
+        // Admin Panel Functions
+        let currentEditItem = null;
+        let currentEditType = null;
+        let isLoading = false;
+
+        function toggleAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            panel.classList.toggle('hidden');
+            
+            if (!panel.classList.contains('hidden')) {
+                console.log('Admin panel opened, loading data...');
+                loadAdminData();
+                // Re-setup form button listeners since elements might be new
+                setTimeout(() => setupFormButtonListeners(), 100);
+            }
+        }
+        
+        // Centralized Event Listener System
+        function setupAllEventListeners() {
+            console.log('🎯 Setting up all admin event listeners...');
+            
+            // Setup main admin panel toggles
+            setupMainAdminListeners();
+            
+            // Setup tab switching
+            setupTabListeners();
+            
+            // Setup form buttons
+            setupFormButtonListeners();
+            
+            // Setup form submissions
+            setupFormSubmissionListeners();
+            
+            // Setup notification close buttons
+            setupNotificationListeners();
+            
+            // Setup table event listeners (using delegation)
+            setupTableEventListeners();
+            
+            console.log('✅ All event listeners setup complete');
+        }
+        
+        function setupMainAdminListeners() {
+            // Admin panel toggle button
+            const adminBtn = document.getElementById('admin-btn');
+            if (adminBtn) {
+                adminBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Admin button clicked');
+                    toggleAdminPanel();
+                });
+            }
+            
+            // Admin panel close button
+            const closeBtn = document.getElementById('admin-close-btn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Admin close button clicked');
+                    toggleAdminPanel();
+                });
+            }
+        }
+        
+        function setupTabListeners() {
+            // Admin tab buttons
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabName = tab.getAttribute('data-tab');
+                    console.log('Tab clicked:', tabName);
+                    if (tabName) {
+                        switchAdminTab(tabName);
+                    }
+                });
+            });
+        }
+        
+        function setupFormButtonListeners() {
+            // Add buttons
+            const addProductBtn = document.getElementById('add-product-btn');
+            if (addProductBtn) {
+                addProductBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('🎯 Add Product button clicked!');
+                    showAddProductForm();
+                });
+            }
+            
+            const addPartnerBtn = document.getElementById('add-partner-btn');
+            if (addPartnerBtn) {
+                addPartnerBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('🎯 Add Partner button clicked!');
+                    showAddPartnerForm();
+                });
+            }
+            
+            const addIpFilterBtn = document.getElementById('add-ip-filter-btn');
+            if (addIpFilterBtn) {
+                addIpFilterBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('🎯 Add IP Filter button clicked!');
+                    showAddIpFilterForm();
+                });
+            }
+            
+            // Cancel buttons
+            const cancelProductBtn = document.getElementById('cancel-product-btn');
+            if (cancelProductBtn) {
+                cancelProductBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Cancel Product button clicked');
+                    cancelProductForm();
+                });
+            }
+            
+            const cancelPartnerBtn = document.getElementById('cancel-partner-btn');
+            if (cancelPartnerBtn) {
+                cancelPartnerBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Cancel Partner button clicked');
+                    cancelPartnerForm();
+                });
+            }
+            
+            const cancelIpFilterBtn = document.getElementById('cancel-ip-filter-btn');
+            if (cancelIpFilterBtn) {
+                cancelIpFilterBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Cancel IP Filter button clicked');
+                    cancelIpFilterForm();
+                });
+            }
+        }
+        
+        function setupFormSubmissionListeners() {
+            // Partner form
+            const partnerForm = document.getElementById('partner-form-element');
+            if (partnerForm) {
+                partnerForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    console.log('Partner form submitted');
+                    handlePartnerSubmit(e);
+                });
+            }
+            
+            // Product form
+            const productForm = document.getElementById('product-form-element');
+            if (productForm) {
+                productForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    console.log('Product form submitted');
+                    handleProductSubmit(e);
+                });
+            }
+            
+            // IP Filter form
+            const ipFilterForm = document.getElementById('ip-filter-form-element');
+            if (ipFilterForm) {
+                ipFilterForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    console.log('IP Filter form submitted');
+                    handleIpFilterSubmit(e);
+                });
+            }
+        }
+        
+        function setupNotificationListeners() {
+            // Use event delegation for dynamically created notification close buttons
+            document.body.addEventListener('click', (e) => {
+                if (e.target.closest('.notification-close-btn')) {
+                    const notification = e.target.closest('.notification');
+                    if (notification) {
+                        notification.remove();
+                    }
+                }
+            });
+        }
+        
+        function setupTableEventListeners() {
+            // Use event delegation for dynamically created table buttons
+            document.body.addEventListener('click', (e) => {
+                // Edit Partner
+                if (e.target.closest('.edit-partner-btn')) {
+                    e.preventDefault();
+                    const btn = e.target.closest('.edit-partner-btn');
+                    const partnerData = JSON.parse(btn.getAttribute('data-partner'));
+                    console.log('Edit partner clicked:', partnerData);
+                    editPartner(partnerData);
+                }
+                
+                // Delete Partner
+                if (e.target.closest('.delete-partner-btn')) {
+                    e.preventDefault();
+                    const btn = e.target.closest('.delete-partner-btn');
+                    const partnerCode = btn.getAttribute('data-partner-code');
+                    console.log('Delete partner clicked:', partnerCode);
+                    deletePartner(partnerCode);
+                }
+                
+                // Edit Product
+                if (e.target.closest('.edit-product-btn')) {
+                    e.preventDefault();
+                    const btn = e.target.closest('.edit-product-btn');
+                    const productData = JSON.parse(btn.getAttribute('data-product'));
+                    console.log('Edit product clicked:', productData);
+                    editProduct(productData);
+                }
+                
+                // Delete Product
+                if (e.target.closest('.delete-product-btn')) {
+                    e.preventDefault();
+                    const btn = e.target.closest('.delete-product-btn');
+                    const productId = btn.getAttribute('data-product-id');
+                    console.log('Delete product clicked:', productId);
+                    deleteProduct(productId);
+                }
+                
+                // Edit IP Filter
+                if (e.target.closest('.edit-ip-filter-btn')) {
+                    e.preventDefault();
+                    const btn = e.target.closest('.edit-ip-filter-btn');
+                    const filterData = JSON.parse(btn.getAttribute('data-filter'));
+                    console.log('Edit IP filter clicked:', filterData);
+                    editIpFilter(filterData);
+                }
+                
+                // Delete IP Filter
+                if (e.target.closest('.delete-ip-filter-btn')) {
+                    e.preventDefault();
+                    const btn = e.target.closest('.delete-ip-filter-btn');
+                    const ipAddress = btn.getAttribute('data-ip-address');
+                    console.log('Delete IP filter clicked:', ipAddress);
+                    deleteIpFilter(ipAddress);
+                }
+            });
+        }
+
+        function switchAdminTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.admin-tab').forEach(tab => tab.classList.remove('active'));
+            
+            // Find the tab by data-tab attribute instead of onclick
+            const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+
+            // Update tab content
+            document.querySelectorAll('.admin-tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`admin-${tabName}-tab`).classList.add('active');
+
+            // Hide all forms when switching tabs
+            hideAllForms();
+            
+            console.log(`✅ Switched to ${tabName} tab`);
+        }
+
+        function hideAllForms() {
+            document.querySelectorAll('.admin-form').forEach(form => form.classList.add('hidden'));
+            resetAllForms();
+        }
+
+        function resetAllForms() {
+            document.querySelectorAll('.admin-form form').forEach(form => form.reset());
+            currentEditItem = null;
+            currentEditType = null;
+        }
+
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            document.querySelectorAll('.notification').forEach(n => n.remove());
+
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            
+            const iconMap = {
+                'error': 'exclamation-triangle',
+                'success': 'check-circle',
+                'info': 'info-circle',
+                'warning': 'exclamation-circle'
+            };
+
+            // Create elements safely without innerHTML to avoid CSP issues
+            const icon = document.createElement('i');
+            icon.className = `fas fa-${iconMap[type]}`;
+            
+            const messageSpan = document.createElement('span');
+            messageSpan.textContent = message;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'notification-close-btn';
+            closeBtn.style.background = 'none';
+            closeBtn.style.border = 'none';
+            closeBtn.style.color = 'inherit';
+            closeBtn.style.marginLeft = 'auto';
+            closeBtn.style.cursor = 'pointer';
+            
+            const closeIcon = document.createElement('i');
+            closeIcon.className = 'fas fa-times';
+            closeBtn.appendChild(closeIcon);
+            
+            notification.appendChild(icon);
+            notification.appendChild(messageSpan);
+            notification.appendChild(closeBtn);
+
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.animation = 'slideInRight 0.3s ease-out reverse';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Partner Functions
+        function showAddPartnerForm() {
+            hideAllForms();
+            currentEditItem = null;
+            document.getElementById('partner-form-title').textContent = 'Add New Partner';
+            document.getElementById('partner-submit-text').textContent = 'Create Partner';
+            document.getElementById('partner-form').classList.remove('hidden');
+            setTimeout(() => document.getElementById('partner-code').focus(), 100);
+        }
+
+        function cancelPartnerForm() {
+            document.getElementById('partner-form').classList.add('hidden');
+            document.getElementById('partner-form').querySelector('form').reset();
+            currentEditItem = null;
+        }
+
+        async function handlePartnerSubmit(event) {
+            event.preventDefault();
+            if (isLoading) return;
+
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            if (data.fee_percentage) {
+                data.fee_percentage = parseFloat(data.fee_percentage);
+            }
+
+            try {
+                isLoading = true;
+                
+                let response;
+                if (currentEditItem) {
+                    response = await fetch(`/api/v1/admin/partners/${currentEditItem.partner_code}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-API-Key': 'supersecret-admin-key-123'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    response = await fetch('/api/v1/admin/partners', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-API-Key': 'supersecret-admin-key-123'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                if (response.ok) {
+                    showNotification(
+                        currentEditItem ? 'Partner updated successfully' : 'Partner created successfully',
+                        'success'
+                    );
+                    cancelPartnerForm();
+                    loadPartners();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to save partner');
+                }
+            } catch (error) {
+                console.error('Error saving partner:', error);
+                showNotification(error.message || 'Failed to save partner', 'error');
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        // Product Functions
+        function showAddProductForm() {
+            console.log('🎯 showAddProductForm() called!');
+            
+            hideAllForms();
+            currentEditItem = null;
+            
+            // Ensure the product form elements exist and populate partner dropdown
+            loadPartnerDropdown();
+            
+            const titleEl = document.getElementById('product-form-title');
+            const submitEl = document.getElementById('product-submit-text');
+            const formEl = document.getElementById('product-form');
+            
+            console.log('Form elements found:', {
+                titleEl: !!titleEl,
+                submitEl: !!submitEl,
+                formEl: !!formEl
+            });
+            
+            if (titleEl) titleEl.textContent = 'Add New Product';
+            if (submitEl) submitEl.textContent = 'Create Product';
+            if (formEl) {
+                console.log('✅ Showing product form');
+                formEl.classList.remove('hidden');
+                // Reset form
+                const form = formEl.querySelector('form');
+                if (form) form.reset();
+            } else {
+                console.log('❌ Product form element not found');
+            }
+            
+            setTimeout(() => {
+                const firstInput = document.getElementById('product-code');
+                if (firstInput) {
+                    console.log('✅ Focusing first input');
+                    firstInput.focus();
+                } else {
+                    console.log('❌ First input not found');
+                }
+            }, 100);
+        }
+        
+        // Load partner dropdown options
+        async function loadPartnerDropdown() {
+            try {
+                const response = await fetch('/api/v1/admin/partners', {
+                    headers: { 'X-Admin-API-Key': 'supersecret-admin-key-123' }
+                });
+                
+                let partners = [];
+                if (response.ok) {
+                    const result = await response.json();
+                    partners = result.data || result || [];
+                } else {
+                    // Fallback partners
+                    partners = [
+                        { partner_code: 'fcb', partner_name: 'First Capital Bank' },
+                        { partner_code: 'zimnat', partner_name: 'Zimnat Insurance' }
+                    ];
+                }
+                
+                const partnerSelect = document.getElementById('product-partner-code');
+                if (partnerSelect && partners.length > 0) {
+                    partnerSelect.innerHTML = '<option value="">Select Partner</option>' + 
+                        partners.map(p => `<option value="${p.partner_code}">${p.partner_name}</option>`).join('');
+                }
+            } catch (error) {
+                console.warn('Failed to load partners for dropdown:', error);
+            }
+        }
+
+        function cancelProductForm() {
+            document.getElementById('product-form').classList.add('hidden');
+            document.getElementById('product-form').querySelector('form').reset();
+            currentEditItem = null;
+        }
+
+        async function handleProductSubmit(event) {
+            event.preventDefault();
+            if (isLoading) return;
+
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Validate required fields
+            if (!data.product_code || !data.product_name || !data.category_code || !data.partner_code) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                isLoading = true;
+                
+                // Show loading on submit button
+                const submitBtn = document.querySelector('#product-form button[type="submit"]');
+                const originalText = submitBtn ? submitBtn.innerHTML : '';
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                    submitBtn.disabled = true;
+                }
+                
+                let response;
+                if (currentEditItem) {
+                    response = await fetch(`/api/v1/admin/products/${currentEditItem.product_id || currentEditItem.product_code}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-API-Key': 'supersecret-admin-key-123'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    response = await fetch('/api/v1/admin/products', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-API-Key': 'supersecret-admin-key-123'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                if (response.ok) {
+                    showNotification(
+                        currentEditItem ? 'Product updated successfully' : 'Product created successfully',
+                        'success'
+                    );
+                    cancelProductForm();
+                    loadProducts();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || error.message || 'Failed to save product');
+                }
+            } catch (error) {
+                console.error('Error saving product:', error);
+                showNotification(error.message || 'Failed to save product', 'error');
+            } finally {
+                isLoading = false;
+                
+                // Restore submit button
+                const submitBtn = document.querySelector('#product-form button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = originalText || '<i class="fas fa-save"></i> <span id="product-submit-text">Create Product</span>';
+                    submitBtn.disabled = false;
+                }
+            }
+        }
+
+        // IP Filter Functions
+        function showAddIpFilterForm() {
+            hideAllForms();
+            currentEditItem = null;
+            document.getElementById('ip-filter-form-title').textContent = 'Add New IP Filter';
+            document.getElementById('ip-filter-submit-text').textContent = 'Create IP Filter';
+            document.getElementById('ip-filter-form').classList.remove('hidden');
+            setTimeout(() => document.getElementById('ip-address').focus(), 100);
+        }
+
+        function cancelIpFilterForm() {
+            document.getElementById('ip-filter-form').classList.add('hidden');
+            document.getElementById('ip-filter-form').querySelector('form').reset();
+            currentEditItem = null;
+        }
+
+        async function handleIpFilterSubmit(event) {
+            event.preventDefault();
+            if (isLoading) return;
+
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                isLoading = true;
+                
+                let response;
+                if (currentEditItem) {
+                    response = await fetch(`/api/v1/admin/ip-filters/${currentEditItem.ip_address}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-API-Key': 'supersecret-admin-key-123'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    response = await fetch('/api/v1/admin/ip-filters', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-API-Key': 'supersecret-admin-key-123'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                if (response.ok) {
+                    showNotification(
+                        currentEditItem ? 'IP filter updated successfully' : 'IP filter created successfully',
+                        'success'
+                    );
+                    cancelIpFilterForm();
+                    loadIpFilters();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to save IP filter');
+                }
+            } catch (error) {
+                console.error('Error saving IP filter:', error);
+                showNotification(error.message || 'Failed to save IP filter', 'error');
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        // Data Loading Functions
+        async function loadAdminData() {
+            await Promise.all([loadPartners(), loadProducts(), loadIpFilters()]);
+            // Also ensure partner dropdown is populated
+            await loadPartnerDropdown();
+        }
+
+        async function loadPartners() {
+            try {
+                let partners = [];
+                try {
+                    const response = await fetch('/api/v1/admin/partners', {
+                        headers: { 'X-Admin-API-Key': 'supersecret-admin-key-123' }
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        partners = result.data || result || [];
+                    }
+                } catch (error) {
+                    console.warn('Failed to load partners from API, using fallback data');
+                }
+
+                // Fallback data
+                if (!Array.isArray(partners) || partners.length === 0) {
+                    partners = [
+                        {
+                            id: 1,
+                            partner_code: 'fcb',
+                            partner_name: 'First Capital Bank',
+                            integration_type: 'api',
+                            fee_percentage: 0.02,
+                            is_active: true
+                        },
+                        {
+                            id: 2,
+                            partner_code: 'zimnat',
+                            partner_name: 'Zimnat Insurance',
+                            integration_type: 'webhook',
+                            fee_percentage: 0.015,
+                            is_active: true
+                        }
+                    ];
+                }
+
+                renderPartnersTable(partners);
+                updatePartnerSelects(partners);
+            } catch (error) {
+                console.error('Error loading partners:', error);
+                showNotification('Failed to load partners', 'error');
+            }
+        }
+
+        function renderPartnersTable(partners) {
+            const tbody = document.getElementById('admin-partners-tbody');
+            
+            // Clear existing content
+            tbody.innerHTML = '';
+            
+            if (!partners || partners.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 6;
+                cell.style.textAlign = 'center';
+                cell.style.color = 'rgba(255,255,255,0.6)';
+                cell.style.padding = '2rem';
+                
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-info-circle';
+                cell.appendChild(icon);
+                cell.appendChild(document.createTextNode(' No partners found'));
+                
+                row.appendChild(cell);
+                tbody.appendChild(row);
+                return;
+            }
+
+            partners.forEach(partner => {
+                const row = document.createElement('tr');
+                
+                // Partner Code
+                const codeCell = document.createElement('td');
+                const codeStrong = document.createElement('strong');
+                codeStrong.textContent = partner.partner_code || 'N/A';
+                codeCell.appendChild(codeStrong);
+                row.appendChild(codeCell);
+                
+                // Partner Name
+                const nameCell = document.createElement('td');
+                nameCell.textContent = partner.partner_name || 'Unknown';
+                row.appendChild(nameCell);
+                
+                // Integration Type
+                const typeCell = document.createElement('td');
+                const typeSpan = document.createElement('span');
+                typeSpan.className = 'status-badge status-active';
+                typeSpan.textContent = partner.integration_type || 'api';
+                typeCell.appendChild(typeSpan);
+                row.appendChild(typeCell);
+                
+                // Fee Percentage
+                const feeCell = document.createElement('td');
+                feeCell.textContent = `${((partner.fee_percentage || 0) * 100).toFixed(2)}%`;
+                row.appendChild(feeCell);
+                
+                // Status
+                const statusCell = document.createElement('td');
+                const statusSpan = document.createElement('span');
+                statusSpan.className = `status-badge ${partner.is_active !== false ? 'status-active' : 'status-inactive'}`;
+                statusSpan.textContent = partner.is_active !== false ? 'Active' : 'Inactive';
+                statusCell.appendChild(statusSpan);
+                row.appendChild(statusCell);
+                
+                // Actions
+                const actionsCell = document.createElement('td');
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'action-buttons';
+                
+                // Edit button
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn btn-sm btn-secondary edit-partner-btn';
+                editBtn.setAttribute('data-partner', JSON.stringify(partner));
+                const editIcon = document.createElement('i');
+                editIcon.className = 'fas fa-edit';
+                editBtn.appendChild(editIcon);
+                editBtn.appendChild(document.createTextNode(' Edit'));
+                actionsDiv.appendChild(editBtn);
+                
+                // Delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-sm btn-danger delete-partner-btn';
+                deleteBtn.setAttribute('data-partner-code', partner.partner_code);
+                const deleteIcon = document.createElement('i');
+                deleteIcon.className = 'fas fa-trash';
+                deleteBtn.appendChild(deleteIcon);
+                deleteBtn.appendChild(document.createTextNode(' Delete'));
+                actionsDiv.appendChild(deleteBtn);
+                
+                actionsCell.appendChild(actionsDiv);
+                row.appendChild(actionsCell);
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function updatePartnerSelects(partners) {
+            const select = document.getElementById('product-partner-code');
+            if (select && partners) {
+                select.innerHTML = '<option value="">Select Partner</option>' + 
+                    partners.map(p => `<option value="${p.partner_code}">${p.partner_name}</option>`).join('');
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                let products = [];
+                try {
+                    const response = await fetch('/api/v1/admin/products', {
+                        headers: { 'X-Admin-API-Key': 'supersecret-admin-key-123' }
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        products = result.data || result || [];
+                    }
+                } catch (error) {
+                    console.warn('Failed to load products from API, using fallback data');
+                }
+
+                // Fallback data
+                if (!Array.isArray(products) || products.length === 0) {
+                    products = [
+                        {
+                            product_id: 'MOTOR-001',
+                            product_name: 'Motor Vehicle Insurance',
+                            product_category: 'Motor Insurance',
+                            partner_code: 'zimnat'
+                        },
+                        {
+                            product_id: 'HEALTH-001',
+                            product_name: 'Health Insurance Plan',
+                            product_category: 'Health Insurance',
+                            partner_code: 'zimnat'
+                        }
+                    ];
+                }
+
+                renderProductsTable(products);
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showNotification('Failed to load products', 'error');
+            }
+        }
+
+        // Helper function to create action buttons safely
+        function createActionButton(text, className, iconClass, dataAttributes = {}) {
+            const btn = document.createElement('button');
+            btn.className = className;
+            
+            const icon = document.createElement('i');
+            icon.className = iconClass;
+            btn.appendChild(icon);
+            btn.appendChild(document.createTextNode(` ${text}`));
+            
+            Object.entries(dataAttributes).forEach(([key, value]) => {
+                btn.setAttribute(key, value);
+            });
+            
+            return btn;
+        }
+        
+        function renderProductsTable(products) {
+            const tbody = document.getElementById('admin-products-tbody');
+            tbody.innerHTML = '';
+            
+            if (!products || products.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 7;
+                cell.style.textAlign = 'center';
+                cell.style.color = 'rgba(255,255,255,0.6)';
+                cell.style.padding = '2rem';
+                
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-info-circle';
+                cell.appendChild(icon);
+                cell.appendChild(document.createTextNode(' No products found'));
+                
+                row.appendChild(cell);
+                tbody.appendChild(row);
+                return;
+            }
+
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                
+                // Product Code
+                const codeCell = document.createElement('td');
+                const codeStrong = document.createElement('strong');
+                codeStrong.textContent = product.product_id || product.product_code || 'N/A';
+                codeCell.appendChild(codeStrong);
+                row.appendChild(codeCell);
+                
+                // Product Name
+                const nameCell = document.createElement('td');
+                nameCell.textContent = product.product_name || 'Unknown';
+                row.appendChild(nameCell);
+                
+                // Category
+                const categoryCell = document.createElement('td');
+                const categorySpan = document.createElement('span');
+                categorySpan.className = 'status-badge status-active';
+                categorySpan.textContent = product.product_category || 'N/A';
+                categoryCell.appendChild(categorySpan);
+                row.appendChild(categoryCell);
+                
+                // Partner
+                const partnerCell = document.createElement('td');
+                partnerCell.textContent = product.partner_code || 'N/A';
+                row.appendChild(partnerCell);
+                
+                // Base Premium
+                const premiumCell = document.createElement('td');
+                premiumCell.textContent = `$${(product.base_premium || 0).toFixed(2)}`;
+                row.appendChild(premiumCell);
+                
+                // Status
+                const statusCell = document.createElement('td');
+                const statusSpan = document.createElement('span');
+                statusSpan.className = `status-badge ${(product.status || 'ACTIVE') === 'ACTIVE' ? 'status-active' : 'status-inactive'}`;
+                statusSpan.textContent = product.status || 'ACTIVE';
+                statusCell.appendChild(statusSpan);
+                row.appendChild(statusCell);
+                
+                // Actions
+                const actionsCell = document.createElement('td');
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'action-buttons';
+                
+                const editBtn = createActionButton('Edit', 'btn btn-sm btn-secondary edit-product-btn', 'fas fa-edit', {
+                    'data-product': JSON.stringify(product)
+                });
+                const deleteBtn = createActionButton('Delete', 'btn btn-sm btn-danger delete-product-btn', 'fas fa-trash', {
+                    'data-product-id': product.product_id || product.product_code
+                });
+                
+                actionsDiv.appendChild(editBtn);
+                actionsDiv.appendChild(deleteBtn);
+                actionsCell.appendChild(actionsDiv);
+                row.appendChild(actionsCell);
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        async function loadIpFilters() {
+            try {
+                let ipFilters = [];
+                try {
+                    const response = await fetch('/api/v1/admin/ip-filters', {
+                        headers: { 'X-Admin-API-Key': 'supersecret-admin-key-123' }
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        ipFilters = result.data || result || [];
+                    }
+                } catch (error) {
+                    console.warn('Failed to load IP filters from API, using fallback data');
+                }
+
+                // Fallback data
+                if (!Array.isArray(ipFilters) || ipFilters.length === 0) {
+                    ipFilters = [
+                        {
+                            id: 1,
+                            ip_address: '192.168.1.100',
+                            filter_type: 'whitelist'
+                        },
+                        {
+                            id: 2,
+                            ip_address: '10.0.0.5',
+                            filter_type: 'blacklist'
+                        }
+                    ];
+                }
+
+                renderIpFiltersTable(ipFilters);
+            } catch (error) {
+                console.error('Error loading IP filters:', error);
+                showNotification('Failed to load IP filters', 'error');
+            }
+        }
+
+        function renderIpFiltersTable(ipFilters) {
+            const tbody = document.getElementById('admin-ip-filters-tbody');
+            tbody.innerHTML = '';
+            
+            if (!ipFilters || ipFilters.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 5;
+                cell.style.textAlign = 'center';
+                cell.style.color = 'rgba(255,255,255,0.6)';
+                cell.style.padding = '2rem';
+                
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-info-circle';
+                cell.appendChild(icon);
+                cell.appendChild(document.createTextNode(' No IP filters found'));
+                
+                row.appendChild(cell);
+                tbody.appendChild(row);
+                return;
+            }
+
+            ipFilters.forEach(filter => {
+                const row = document.createElement('tr');
+                
+                // IP Address
+                const ipCell = document.createElement('td');
+                const ipStrong = document.createElement('strong');
+                ipStrong.textContent = filter.ip_address || 'N/A';
+                ipCell.appendChild(ipStrong);
+                row.appendChild(ipCell);
+                
+                // Filter Type
+                const typeCell = document.createElement('td');
+                const typeSpan = document.createElement('span');
+                typeSpan.className = `status-badge ${(filter.filter_type || 'whitelist') === 'whitelist' ? 'status-active' : 'status-inactive'}`;
+                typeSpan.textContent = filter.filter_type || 'whitelist';
+                typeCell.appendChild(typeSpan);
+                row.appendChild(typeCell);
+                
+                // Description
+                const descCell = document.createElement('td');
+                descCell.textContent = filter.description || 'No description';
+                row.appendChild(descCell);
+                
+                // Created At
+                const dateCell = document.createElement('td');
+                dateCell.textContent = filter.created_at ? new Date(filter.created_at).toLocaleDateString() : 'N/A';
+                row.appendChild(dateCell);
+                
+                // Actions
+                const actionsCell = document.createElement('td');
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'action-buttons';
+                
+                const editBtn = createActionButton('Edit', 'btn btn-sm btn-secondary edit-ip-filter-btn', 'fas fa-edit', {
+                    'data-filter': JSON.stringify(filter)
+                });
+                const deleteBtn = createActionButton('Delete', 'btn btn-sm btn-danger delete-ip-filter-btn', 'fas fa-trash', {
+                    'data-ip-address': filter.ip_address
+                });
+                
+                actionsDiv.appendChild(editBtn);
+                actionsDiv.appendChild(deleteBtn);
+                actionsCell.appendChild(actionsDiv);
+                row.appendChild(actionsCell);
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Edit Functions
+        function editPartner(partner) {
+            currentEditItem = partner;
+            document.getElementById('partner-form-title').textContent = 'Edit Partner';
+            document.getElementById('partner-submit-text').textContent = 'Update Partner';
+            
+            document.getElementById('partner-code').value = partner.partner_code || '';
+            document.getElementById('partner-name').value = partner.partner_name || '';
+            document.getElementById('integration-type').value = partner.integration_type || '';
+            document.getElementById('fee-percentage').value = partner.fee_percentage || '';
+            
+            document.getElementById('partner-form').classList.remove('hidden');
+        }
+
+        function editProduct(product) {
+            currentEditItem = product;
+            document.getElementById('product-form-title').textContent = 'Edit Product';
+            document.getElementById('product-submit-text').textContent = 'Update Product';
+            
+            document.getElementById('product-code').value = product.product_id || product.product_code || '';
+            document.getElementById('product-name').value = product.product_name || '';
+            document.getElementById('category-code').value = getCategoryCode(product.product_category);
+            document.getElementById('product-partner-code').value = product.partner_code || '';
+            
+            document.getElementById('product-form').classList.remove('hidden');
+        }
+
+        function editIpFilter(filter) {
+            currentEditItem = filter;
+            document.getElementById('ip-filter-form-title').textContent = 'Edit IP Filter';
+            document.getElementById('ip-filter-submit-text').textContent = 'Update IP Filter';
+            
+            document.getElementById('ip-address').value = filter.ip_address || '';
+            document.getElementById('filter-type').value = filter.filter_type || '';
+            
+            document.getElementById('ip-filter-form').classList.remove('hidden');
+        }
+
+        // Delete Functions
+        async function deletePartner(partnerCode) {
+            if (!confirm(`Are you sure you want to delete partner "${partnerCode}"?`)) return;
+
+            try {
+                const response = await fetch(`/api/v1/admin/partners/${partnerCode}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-API-Key': 'supersecret-admin-key-123' }
+                });
+
+                if (response.ok) {
+                    showNotification('Partner deleted successfully', 'success');
+                    loadPartners();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to delete partner');
+                }
+            } catch (error) {
+                console.error('Error deleting partner:', error);
+                showNotification(error.message || 'Failed to delete partner', 'error');
+            }
+        }
+
+        async function deleteProduct(productId) {
+            if (!confirm(`Are you sure you want to delete product "${productId}"?`)) return;
+
+            try {
+                const response = await fetch(`/api/v1/admin/products/${productId}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-API-Key': 'supersecret-admin-key-123' }
+                });
+
+                if (response.ok) {
+                    showNotification('Product deleted successfully', 'success');
+                    loadProducts();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to delete product');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showNotification(error.message || 'Failed to delete product', 'error');
+            }
+        }
+
+        async function deleteIpFilter(ipAddress) {
+            if (!confirm(`Are you sure you want to delete IP filter for "${ipAddress}"?`)) return;
+
+            try {
+                const response = await fetch(`/api/v1/admin/ip-filters/${encodeURIComponent(ipAddress)}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-API-Key': 'supersecret-admin-key-123' }
+                });
+
+                if (response.ok) {
+                    showNotification('IP filter deleted successfully', 'success');
+                    loadIpFilters();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to delete IP filter');
+                }
+            } catch (error) {
+                console.error('Error deleting IP filter:', error);
+                showNotification(error.message || 'Failed to delete IP filter', 'error');
+            }
+        }
+
+        // Utility Functions
+        function getCategoryCode(categoryName) {
+            const categoryMap = {
+                'Motor Insurance': 'MOTOR',
+                'Health Insurance': 'HEALTH',
+                'Travel Insurance': 'TRAVEL',
+                'Personal Accident Insurance': 'PERSONAL_ACCIDENT',
+                'HCP Insurance': 'HCP'
+            };
+            return categoryMap[categoryName] || '';
+        }
+        
+    </script>
+</body>
+</html>
